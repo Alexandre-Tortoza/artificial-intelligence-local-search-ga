@@ -1,7 +1,3 @@
-"""
-Implementação do Algoritmo Genético para seleção de características.
-"""
-
 import numpy as np
 import time
 from sklearn.tree import DecisionTreeClassifier
@@ -9,32 +5,24 @@ import config
 
 
 def criar_populacao_inicial(tamanho_populacao, numero_caracteristicas):
-    """Cria população inicial aleatória."""
     return np.random.randint(0, 2, size=(tamanho_populacao, numero_caracteristicas))
 
 
 def calcular_aptidao(individuo, X_train, y_train, X_val, y_val):
-    """
-    Calcula aptidão do indivíduo.
-    
-    Formula: 0.7 * acuracia + 0.3 * (1 - proporcao_caracteristicas)
-    """
+    # 0.7 * acuracia + 0.3 * (1 - proporcao_caracteristicas)
     num_selecionadas = individuo.sum()
     
     if num_selecionadas == 0:
         return 0.0
     
-    # Selecionar características
     mascara = individuo.astype(bool)
     X_train_sel = X_train[:, mascara]
     X_val_sel = X_val[:, mascara]
     
-    # Treinar e avaliar
     modelo = DecisionTreeClassifier(random_state=config.SEMENTE)
     modelo.fit(X_train_sel, y_train)
     acuracia = modelo.score(X_val_sel, y_val)
     
-    # Calcular aptidão
     proporcao = num_selecionadas / len(individuo)
     aptidao = config.AG_PESO_ACURACIA * acuracia + config.AG_PESO_CARACTERISTICAS * (1 - proporcao)
     
@@ -42,14 +30,12 @@ def calcular_aptidao(individuo, X_train, y_train, X_val, y_val):
 
 
 def selecao_torneio(populacao, aptidoes):
-    """Seleciona um indivíduo por torneio."""
     indices = np.random.choice(len(populacao), size=config.AG_TAMANHO_TORNEIO, replace=False)
     melhor_idx = indices[np.argmax(aptidoes[indices])]
     return populacao[melhor_idx].copy()
 
 
 def cruzamento_uniforme(pai1, pai2):
-    """Realiza cruzamento uniforme."""
     if np.random.random() > config.AG_TAXA_CRUZAMENTO:
         return pai1.copy(), pai2.copy()
     
@@ -61,7 +47,6 @@ def cruzamento_uniforme(pai1, pai2):
 
 
 def mutacao(individuo):
-    """Aplica mutação bit flip."""
     for i in range(len(individuo)):
         if np.random.random() < config.AG_TAXA_MUTACAO:
             individuo[i] = 1 - individuo[i]

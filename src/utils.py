@@ -24,14 +24,3 @@ def criar_validacao(X_train, y_train):
         random_state=config.SEMENTE,
         stratify=y_train
     )
-
-
-# def treinar_e_avaliar(X_train, y_train, X_test, y_test, mascara_caracteristicas):
-#     mascara = mascara_caracteristicas.astype(bool)
-#     X_train_sel = X_train[:, mascara]
-#     X_test_sel = X_test[:, mascara]
-    
-#     modelo = DecisionTreeClassifier(random_state=config.SEMENTE)
-#     modelo.fit(X_train_sel, y_train)
-    
-#     return modelo.score(X_test_sel, y_test)

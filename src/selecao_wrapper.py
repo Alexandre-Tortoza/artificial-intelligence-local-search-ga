@@ -1,7 +1,3 @@
-"""
-Implementação de Forward Selection (Wrapper).
-"""
-
 import numpy as np
 import time
 from sklearn.tree import DecisionTreeClassifier
@@ -9,12 +5,6 @@ import config
 
 
 def forward_selection(X_train, y_train, X_val, y_val):
-    """
-    Executa Forward Selection.
-    
-    Returns:
-        array: Máscara binária de características selecionadas
-    """
     num_caracteristicas = X_train.shape[1]
     selecionadas = set()
     disponiveis = set(range(num_caracteristicas))
@@ -29,13 +19,11 @@ def forward_selection(X_train, y_train, X_val, y_val):
         melhor_caracteristica = None
         melhor_acuracia_iteracao = melhor_acuracia
         
-        # Testar cada característica disponível
         for caracteristica in disponiveis:
             temp_selecionadas = selecionadas | {caracteristica}
             mascara = np.zeros(num_caracteristicas, dtype=bool)
             mascara[list(temp_selecionadas)] = True
             
-            # Treinar e avaliar
             X_train_sel = X_train[:, mascara]
             X_val_sel = X_val[:, mascara]
             
@@ -47,7 +35,6 @@ def forward_selection(X_train, y_train, X_val, y_val):
                 melhor_acuracia_iteracao = acuracia
                 melhor_caracteristica = caracteristica
         
-        # Adicionar melhor característica
         if melhor_caracteristica is not None:
             selecionadas.add(melhor_caracteristica)
             disponiveis.remove(melhor_caracteristica)
@@ -64,12 +51,10 @@ def forward_selection(X_train, y_train, X_val, y_val):
         else:
             iteracoes_sem_melhoria += 1
         
-        # Parada
         if iteracoes_sem_melhoria >= config.WRAPPER_PARADA_SEM_MELHORIA:
             print(f"Parada antecipada na iteração {iteracao}")
             break
     
-    # Criar máscara final
     mascara_final = np.zeros(num_caracteristicas, dtype=int)
     mascara_final[list(selecionadas)] = 1
     
@@ -77,24 +62,14 @@ def forward_selection(X_train, y_train, X_val, y_val):
 
 
 def executar_wrapper(X_train, y_train, X_val, y_val, X_test, y_test):
-    """
-    Executa Wrapper Selection completo.
-    
-    Returns:
-        dict: Resultados com acurácia, características, tempos
-    """
-    print("\n=== WRAPPER SELECTION ===")
     tempo_inicio = time.time()
     
-    # Forward selection
     mascara = forward_selection(X_train, y_train, X_val, y_val)
     
     tempo_busca = time.time() - tempo_inicio
     
-    # Avaliar no teste
     tempo_inicio_treino = time.time()
     
-    # Usar TODOS os dados de treino
     X_train_completo = np.vstack([X_train, X_val])
     y_train_completo = np.hstack([y_train, y_val])
     
@@ -110,10 +85,6 @@ def executar_wrapper(X_train, y_train, X_val, y_val, X_test, y_test):
     
     num_selecionadas = mascara.sum()
     porcentagem = 100 * num_selecionadas / len(mascara)
-    
-    print(f"Acurácia teste: {acuracia_teste:.4f}")
-    print(f"Características: {num_selecionadas}/{len(mascara)} ({porcentagem:.1f}%)")
-    print(f"Tempo busca: {tempo_busca:.1f}s")
     
     return {
         'metodo': 'Wrapper',

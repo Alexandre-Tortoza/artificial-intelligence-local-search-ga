@@ -69,31 +69,20 @@ def mutacao(individuo):
 
 
 def executar_ag(X_train, y_train, X_val, y_val, X_test, y_test):
-    """
-    Executa Algoritmo Genético completo.
-    
-    Returns:
-        dict: Resultados com acurácia, características, tempos
-    """
-    print("\n=== ALGORITMO GENÉTICO ===")
     tempo_inicio = time.time()
     
     num_caracteristicas = X_train.shape[1]
     
-    # Criar população inicial
     populacao = criar_populacao_inicial(config.AG_POPULACAO, num_caracteristicas)
     
     melhor_individuo = None
     melhor_aptidao = 0
     geracoes_sem_melhoria = 0
     
-    # Loop evolutivo
     for geracao in range(config.AG_GERACOES):
-        # Avaliar população
         aptidoes = np.array([calcular_aptidao(ind, X_train, y_train, X_val, y_val) 
                             for ind in populacao])
         
-        # Melhor da geração
         idx_melhor = np.argmax(aptidoes)
         if aptidoes[idx_melhor] > melhor_aptidao:
             melhor_aptidao = aptidoes[idx_melhor]
@@ -102,26 +91,16 @@ def executar_ag(X_train, y_train, X_val, y_val, X_test, y_test):
         else:
             geracoes_sem_melhoria += 1
         
-        # Log
-        if geracao % 10 == 0:
-            print(f"Geração {geracao}: Melhor aptidão = {aptidoes[idx_melhor]:.4f}, "
-                  f"Características = {populacao[idx_melhor].sum()}")
-        
-        # Critério de parada
         if geracoes_sem_melhoria >= config.AG_PARADA_SEM_MELHORIA:
-            print(f"Parada antecipada na geração {geracao}")
             break
         
-        # Nova geração
         nova_populacao = []
         
-        # Elitismo
         num_elite = int(config.AG_TAXA_ELITISMO * config.AG_POPULACAO)
         indices_elite = np.argsort(aptidoes)[-num_elite:]
         for idx in indices_elite:
             nova_populacao.append(populacao[idx])
         
-        # Gerar novos indivíduos
         while len(nova_populacao) < config.AG_POPULACAO:
             pai1 = selecao_torneio(populacao, aptidoes)
             pai2 = selecao_torneio(populacao, aptidoes)
@@ -136,10 +115,8 @@ def executar_ag(X_train, y_train, X_val, y_val, X_test, y_test):
     
     tempo_busca = time.time() - tempo_inicio
     
-    # Avaliar melhor solução no teste
     tempo_inicio_treino = time.time()
     
-    # Usar TODOS os dados de treino (não só validação)
     mascara = melhor_individuo.astype(bool)
     X_train_completo = np.vstack([X_train, X_val])
     y_train_completo = np.hstack([y_train, y_val])
@@ -154,10 +131,6 @@ def executar_ag(X_train, y_train, X_val, y_val, X_test, y_test):
     
     num_selecionadas = melhor_individuo.sum()
     porcentagem = 100 * num_selecionadas / num_caracteristicas
-    
-    print(f"Acurácia teste: {acuracia_teste:.4f}")
-    print(f"Características: {num_selecionadas}/{num_caracteristicas} ({porcentagem:.1f}%)")
-    print(f"Tempo busca: {tempo_busca:.1f}s")
     
     return {
         'metodo': 'AG',
